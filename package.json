@@ -1,0 +1,9 @@
+{
+  "name": "viral-print-monorepo",
+  "version": "1.0.0",
+  "scripts": {
+    "install-all": "npm install && cd backend && npm install && cd ../print-fro && npm install",
+    "build": "cd print-fro && npm install && npm run build",
+    "start": "cd backend && npm start"
+  }
+}
