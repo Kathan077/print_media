@@ -1,0 +1,526 @@
+.services-page {
+    background-color: var(--black);
+    color: var(--white);
+    min-height: 100vh;
+    font-family: var(--font-main);
+    overflow-x: hidden;
+}
+
+/* Base UI Overlays */
+.services-page::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* --- HERO --- */
+.svc-hero {
+    height: auto;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-top: 150px;
+    padding-bottom: 80px;
+}
+
+.svc-hero__eyebrow {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    display: block;
+}
+
+.svc-hero__title {
+    font-size: clamp(3.5rem, 12vw, 12rem);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    margin: 0;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+}
+
+.svc-hero__title-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 15px;
+    /* space for descenders */
+    margin-bottom: -15px;
+}
+
+.svc-hero__title-word {
+    display: block;
+}
+
+.svc-hero__subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: rgba(255, 255, 255, 0.6);
+    max-width: 650px;
+    margin: 3rem 0 0;
+    line-height: 1.6;
+    font-weight: 300;
+}
+
+/* --- VERTICAL STACKED CATEGORIES (PRO LEVEL) --- */
+.svc-stack-wrapper {
+    padding: 8rem 0;
+    position: relative;
+    z-index: 10;
+}
+
+.stack-header {
+    margin-bottom: 5rem;
+}
+
+.stack-header h2 {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 5rem);
+    text-transform: uppercase;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+}
+
+.stack-header p {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.6);
+    max-width: 500px;
+}
+
+.stack-container {
+    position: relative;
+    padding-bottom: 100px;
+}
+
+.stacked-card {
+    position: sticky;
+    margin-bottom: 40px;
+    width: 100%;
+    /* border-top adds that premium separator feel */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--black);
+    /* Needs to be solid so it hides cards scrolling up behind it */
+    transform-origin: top center;
+    box-shadow: 0 -20px 40px -20px rgba(0, 0, 0, 0.8);
+}
+
+.stacked-card-inner {
+    padding: 50px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+    background: var(--black);
+}
+
+.stack-left {
+    position: relative;
+}
+
+.stack-number {
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 15vw, 10rem);
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.08);
+    /* Dark subtle stroke */
+    line-height: 0.8;
+    position: absolute;
+    top: -30px;
+    left: -20px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.stack-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    display: block;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.stack-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.stack-desc {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.6);
+    position: relative;
+    z-index: 2;
+}
+
+.stack-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 10px;
+    /* Align slightly down with text */
+}
+
+.stack-list li {
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.stack-list li:hover {
+    transform: translateX(10px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.stack-list li svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+/* --- PREMIUM FINISHES --- */
+.svc-finishes {
+    padding: 8rem 0;
+    border-top: 1px solid var(--glass-border);
+}
+
+.finishes-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 4rem;
+}
+
+.finish-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 40px 30px;
+    text-align: center;
+    border-radius: 4px;
+    transition: all 0.4s ease;
+}
+
+.finish-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.finish-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: var(--magenta);
+    /* Or maybe keep emojis default */
+}
+
+.finish-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.finish-card p {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.6;
+}
+
+/* --- ARSENAL (OUR PRINTERS) --- */
+.svc-arsenal {
+    padding: 8rem 0;
+    border-top: 1px solid var(--glass-border);
+    position: relative;
+    background: linear-gradient(180deg, var(--black) 0%, rgba(15, 15, 15, 1) 100%);
+}
+
+.svc-section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    text-transform: uppercase;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+}
+
+.svc-arsenal-desc {
+    max-width: 700px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 5rem;
+}
+
+.arsenal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.arsenal-card {
+    position: relative;
+}
+
+.arsenal-image-box {
+    width: 100%;
+    height: 600px;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    background: #111;
+    border: 1px solid var(--glass-border);
+}
+
+.printer-img {
+    width: 100%;
+    height: 120%;
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    top: -10%;
+    left: 0;
+    transform: translateZ(0);
+    /* Hardware accel for GSAP scrub */
+}
+
+/* Placeholder gradients since we don't have printer images yet */
+.printer-img.img-1 {
+    background-image: linear-gradient(135deg, #111, #2a2a2a), repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.03) 10px, rgba(255, 255, 255, 0.03) 20px);
+}
+
+.printer-img.img-2 {
+    background-image: linear-gradient(135deg, #181818, #000), repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(0, 255, 255, 0.05) 10px, rgba(0, 255, 255, 0.05) 20px);
+}
+
+.arsenal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    transition: all 0.5s ease;
+}
+
+.arsenal-card:hover .arsenal-overlay {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.arsenal-info {
+    margin-top: 25px;
+}
+
+.arsenal-info h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--white);
+}
+
+.arsenal-info span {
+    font-size: 0.9rem;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* CTA */
+.svc-cta {
+    padding: 10rem 0;
+    background: var(--black);
+}
+
+.svc-cta h2 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.svc-cta p {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 4rem;
+}
+
+.svc-cta-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* BUTTONS */
+.pro-btn {
+    padding: 20px 40px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pro-btn--primary {
+    background: var(--cyan);
+    color: var(--black);
+    border: 1px solid var(--cyan);
+}
+
+.pro-btn--primary:hover {
+    background: var(--white);
+    border-color: var(--white);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px -10px rgba(0, 255, 255, 0.4);
+}
+
+.pro-btn--outline {
+    background: transparent;
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.pro-btn--outline:hover {
+    border-color: var(--white);
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* =========================================
+   RESPONSIVE BREAKPOINTS
+   ========================================= */
+
+@media (max-width: 1200px) {
+    .stacked-card-inner {
+        gap: 30px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .arsenal-image-box {
+        height: 450px;
+    }
+
+    .finishes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stacked-card-inner {
+        grid-template-columns: 1fr;
+        padding: 40px 0;
+        gap: 40px;
+    }
+
+    .stack-number {
+        font-size: clamp(6rem, 20vw, 15rem);
+        top: -60px;
+    }
+
+    .stack-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .svc-hero {
+        padding-top: 120px;
+        padding-bottom: 60px;
+    }
+
+    .svc-stack-wrapper,
+    .svc-finishes,
+    .svc-arsenal {
+        padding: 5rem 0;
+    }
+
+    .svc-cta {
+        padding: 5rem 0;
+    }
+
+    .stack-header {
+        margin-bottom: 3rem;
+    }
+
+    .arsenal-grid {
+        grid-template-columns: 1fr;
+        gap: 60px;
+    }
+
+    .arsenal-image-box {
+        height: 350px;
+    }
+
+    .stack-list {
+        grid-template-columns: 1fr;
+    }
+
+    .stack-list li {
+        padding: 18px;
+    }
+
+    .svc-cta-links {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .svc-hero {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+
+    .arsenal-image-box {
+        height: 250px;
+    }
+
+    .svc-hero__title-line {
+        padding-bottom: 5px;
+        margin-bottom: -5px;
+    }
+
+    .finishes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .finish-card {
+        padding: 30px 20px;
+    }
+}

@@ -1,0 +1,285 @@
+.about-v2-section {
+    position: relative;
+    padding: 10rem 0;
+    background: #f8f8f8;
+    overflow: hidden;
+    color: #000;
+    font-family: 'Inter', sans-serif;
+}
+
+.ab-container {
+    max-width: 1750px;
+    margin: 0 auto;
+    padding: 0 5%;
+    position: relative;
+    z-index: 2;
+}
+
+/* ── Background Elements ── */
+.ab-bg-elements {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.ab-blob-wrap {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+}
+
+.ab-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+}
+
+.ab-blob-1 {
+    width: 70vw;
+    height: 70vw;
+    background: radial-gradient(circle,
+            rgba(37, 99, 235, 0.25) 0%,
+            /* Pro blue */
+            rgba(147, 51, 234, 0.15) 30%,
+            transparent 70%);
+    top: -20%;
+    right: -10%;
+    filter: blur(120px);
+}
+
+.ab-blob-2 {
+    width: 55vw;
+    height: 55vw;
+    background: radial-gradient(circle,
+            rgba(251, 146, 60, 0.15) 0%,
+            rgba(232, 121, 249, 0.1) 50%,
+            transparent 80%);
+    bottom: -15%;
+    left: -15%;
+    filter: blur(140px);
+}
+
+.ab-noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.12;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* ── Sidebar Labels ── */
+.ab-sidebar-label {
+    min-width: 15rem;
+}
+
+.ab-sidebar-text {
+    min-width: 15rem;
+    max-width: 15rem;
+}
+
+.label-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: rgba(0, 0, 0, 0.4);
+    text-transform: uppercase;
+    line-height: 1.4;
+    display: block;
+}
+
+/* ── Top Row Layout ── */
+.ab-top-row {
+    display: flex;
+    gap: 4rem;
+    margin-bottom: 10rem;
+    align-items: flex-start;
+}
+
+.ab-headline-wrap {
+    flex: 1;
+}
+
+.ab-headline {
+    font-size: clamp(3rem, 7.5vw, 9rem);
+    font-weight: 850;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+}
+
+.ab-headline span {
+    display: block;
+}
+
+.outlined {
+    -webkit-text-stroke: 1px #000;
+    color: transparent;
+    font-weight: 900;
+    background: linear-gradient(90deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(37, 99, 235, 0.4) 50%,
+            rgba(0, 0, 0, 0) 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    /* Added standard property */
+    animation: shimmer 12s infinite linear;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Bottom Row Layout ── */
+.ab-bottom-row {
+    display: flex;
+    gap: 4rem;
+    align-items: flex-start;
+}
+
+.ab-stats-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6rem 4rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    border-radius: 24px;
+    backdrop-filter: blur(5px);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.4);
+    border-color: rgba(0, 0, 0, 0.1);
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+}
+
+.stat-num {
+    font-size: clamp(2.5rem, 5vw, 6rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: #000;
+}
+
+.stat-desc {
+    font-size: 1rem;
+    color: rgba(0, 0, 0, 0.6);
+    line-height: 1.5;
+    max-width: 320px;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+
+    .ab-top-row,
+    .ab-bottom-row {
+        gap: 3rem;
+    }
+
+    .ab-sidebar-label,
+    .ab-sidebar-text {
+        min-width: 10rem;
+        max-width: 10rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .ab-top-row {
+        flex-direction: column;
+        gap: 2rem;
+        margin-bottom: 6rem;
+    }
+
+    .ab-bottom-row {
+        flex-direction: column-reverse;
+        gap: 4rem;
+    }
+
+    .ab-sidebar-label,
+    .ab-sidebar-text {
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    .ab-stats-grid {
+        gap: 4rem 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-v2-section {
+        padding: 5rem 0;
+    }
+
+    .ab-top-row {
+        gap: 2rem;
+        margin-bottom: 4rem;
+    }
+
+    .ab-bottom-row {
+        gap: 3rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .ab-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .stat-num {
+        font-size: 3.5rem;
+    }
+
+    .ab-headline {
+        font-size: 12vw;
+    }
+
+    .outlined {
+        -webkit-text-stroke: 1.5px #000;
+    }
+}
+
+@media (max-width: 425px) {
+    .about-v2-section {
+        padding: 4rem 0;
+    }
+
+    .ab-top-row {
+        margin-bottom: 2rem;
+    }
+
+    .stat-item {
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 320px) {
+    .about-v2-section {
+        padding: 3rem 0;
+    }
+}

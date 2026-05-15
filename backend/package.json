@@ -1,0 +1,18 @@
+{
+  "name": "viral-print-backend",
+  "version": "1.0.0",
+  "description": "Backend for Viral Print to send email notifications and SMS confirmations",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.13",
+    "twilio": "^5.0.4"
+  }
+}
