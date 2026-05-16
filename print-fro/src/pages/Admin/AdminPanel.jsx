@@ -21,7 +21,7 @@ const AdminPanel = () => {
     const [successMsg, setSuccessMsg] = useState("");
 
     const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
+    const [categories, setCategories] = useState(defaultCategories);
     const [newCategory, setNewCategory] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
@@ -40,7 +40,7 @@ const AdminPanel = () => {
             const res = await fetch(`${API_URL}/api/products`);
             const data = await res.json();
             if (data.success) setProducts(data.data);
-        } catch (err) { console.error(err); }
+        } catch (err) { console.error("Product Fetch Error:", err); }
         finally { setIsLoading(false); }
     };
 
@@ -50,12 +50,15 @@ const AdminPanel = () => {
             const res = await fetch(`${API_URL}/api/categories`);
             const data = await res.json();
             if (data.success && data.data.length > 0) {
-                setCategories(data.data.map(c => c.name));
+                const dbCats = data.data.map(c => c.name);
+                // Ensure default categories are always there
+                const uniqueCats = [...new Set([...defaultCategories, ...dbCats])];
+                setCategories(uniqueCats);
             } else {
                 setCategories(defaultCategories);
             }
         } catch (err) { 
-            console.error(err);
+            console.error("Category Fetch Error:", err);
             setCategories(defaultCategories);
         }
     };
@@ -70,6 +73,7 @@ const AdminPanel = () => {
         if (phone.trim() === ADMIN_CREDENTIALS.phone && password === ADMIN_CREDENTIALS.password) {
             localStorage.setItem("viralprint_admin_auth", "true");
             setIsAuthenticated(true);
+            setError("");
         } else { setError("Invalid credentials"); }
     };
 
@@ -96,20 +100,29 @@ const AdminPanel = () => {
             });
             const data = await res.json();
             if (data.success) {
-                setSuccessMsg(editingProduct ? "Updated!" : "Added!");
+                setSuccessMsg(editingProduct ? "Product Updated!" : "Product Added!");
                 fetchProducts();
                 setEditingProduct(null);
                 setFormData({ id: null, title: "", category: categories[0] || "Sign Boards", description: "", price: "", image: "", whatsappMsg: "" });
+            } else {
+                setError(data.message || "Failed to save product");
             }
-        } catch (err) { console.error(err); }
-        finally { setIsLoading(false); setTimeout(() => setSuccessMsg(""), 3000); }
+        } catch (err) { setError("Network error"); }
+        finally { setIsLoading(false); setTimeout(() => { setSuccessMsg(""); setError(""); }, 3000); }
+    };
+
+    const handleEdit = (p) => {
+        setEditingProduct(true);
+        setFormData(p);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleDelete = async (id) => {
         if(!window.confirm("Delete this product?")) return;
         try {
             const res = await fetch(`${API_URL}/api/products/${id}`, { method: 'DELETE' });
-            if ((await res.json()).success) {
+            const data = await res.json();
+            if (data.success) {
                 setSuccessMsg("Deleted!");
                 fetchProducts();
             }
@@ -121,7 +134,13 @@ const AdminPanel = () => {
     const handleAddCategory = async (e) => {
         e.preventDefault();
         const trimmed = newCategory.trim();
-        if(!trimmed || categories.includes(trimmed)) return;
+        if(!trimmed) return;
+        
+        if (categories.includes(trimmed)) {
+            setError("Category already exists");
+            setTimeout(() => setError(""), 3000);
+            return;
+        }
 
         try {
             const res = await fetch(`${API_URL}/api/categories`, {
@@ -129,22 +148,30 @@ const AdminPanel = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: trimmed })
             });
-            if ((await res.json()).success) {
-                setSuccessMsg(`Category added!`);
-                fetchCategories();
+            const data = await res.json();
+            if (data.success) {
+                setSuccessMsg(`Category '${trimmed}' added!`);
+                await fetchCategories();
                 setNewCategory("");
+            } else {
+                setError(data.message || "Could not add category");
             }
-        } catch (err) { console.error(err); }
-        finally { setTimeout(() => setSuccessMsg(""), 3000); }
+        } catch (err) { setError("Category API Error"); }
+        finally { setTimeout(() => { setSuccessMsg(""); setError(""); }, 3000); }
     };
 
     const handleDeleteCategory = async (catName) => {
-        if(catName === "All") return;
+        if(defaultCategories.includes(catName)) {
+            setError("Cannot delete default categories");
+            setTimeout(() => setError(""), 3000);
+            return;
+        }
         if(!window.confirm(`Delete '${catName}'?`)) return;
 
         try {
             const res = await fetch(`${API_URL}/api/categories/${catName}`, { method: 'DELETE' });
-            if ((await res.json()).success) {
+            const data = await res.json();
+            if (data.success) {
                 setSuccessMsg("Category deleted!");
                 fetchCategories();
             }
@@ -155,10 +182,8 @@ const AdminPanel = () => {
     if (!isAuthenticated) {
         return (
             <div className="admin-login-container">
-                <div className="mesh-gradient" />
                 <form className="admin-login-form" onSubmit={handleLogin}>
                     <div className="login-header">
-                        <span className="label-caps">SECURE ACCESS</span>
                         <h2>Admin <span>Login</span></h2>
                     </div>
                     {error && <p className="error-msg">{error}</p>}
@@ -171,7 +196,7 @@ const AdminPanel = () => {
                         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
                     <button type="submit" className="pro-btn pro-btn--primary">Enter Dashboard</button>
-                    <Link to="/" className="back-link">Return to Home</Link>
+                    <Link to="/" className="back-link">Back Home</Link>
                 </form>
             </div>
         );
@@ -184,83 +209,53 @@ const AdminPanel = () => {
 
     return (
         <div className="admin-panel-layout">
-            <div className="mesh-gradient" />
-            
             <aside className="admin-sidebar glass">
                 <div className="sidebar-brand">
                     <div className="brand-icon">V</div>
                     <h3>VIRAL<span>ADMIN</span></h3>
                 </div>
-                
                 <nav className="sidebar-nav">
-                    <button className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
-                        <span>Dashboard</span>
-                    </button>
-                    <button className={`nav-item ${activeTab === 'products' ? 'active' : ''}`} onClick={() => setActiveTab('products')}>
-                        <span>Products</span>
-                    </button>
-                    <button className={`nav-item ${activeTab === 'categories' ? 'active' : ''}`} onClick={() => setActiveTab('categories')}>
-                        <span>Categories</span>
-                    </button>
+                    <button className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>Dashboard</button>
+                    <button className={`nav-item ${activeTab === 'products' ? 'active' : ''}`} onClick={() => setActiveTab('products')}>Products</button>
+                    <button className={`nav-item ${activeTab === 'categories' ? 'active' : ''}`} onClick={() => setActiveTab('categories')}>Categories</button>
                 </nav>
-
                 <div className="sidebar-footer">
-                    <Link to="/" className="view-site-link">Live Site</Link>
+                    <Link to="/" className="view-site-link">View Site</Link>
                     <button onClick={handleLogout} className="logout-trigger">Sign Out</button>
                 </div>
             </aside>
 
             <main className="admin-main">
                 <header className="admin-top-bar">
-                    <div className="top-bar-left">
-                        <h2>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h2>
-                    </div>
-                    {activeTab === 'products' && (
-                        <div className="top-bar-search">
-                            <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                        </div>
-                    )}
+                    <h2>{activeTab.toUpperCase()}</h2>
                 </header>
 
                 <div className="admin-scroll-area">
                     {successMsg && <div className="success-banner">{successMsg}</div>}
+                    {error && <div className="success-banner" style={{background: '#ff4d4d'}}>{error}</div>}
 
                     {activeTab === 'dashboard' && (
                         <div className="dashboard-grid">
-                            <div className="stat-card glass">
-                                <span className="stat-label">Total Products</span>
-                                <span className="stat-value">{products.length}</span>
-                            </div>
-                            <div className="stat-card glass">
-                                <span className="stat-label">Total Categories</span>
-                                <span className="stat-value">{categories.length}</span>
-                            </div>
+                            <div className="stat-card glass"><span>Products</span><h4>{products.length}</h4></div>
+                            <div className="stat-card glass"><span>Categories</span><h4>{categories.length}</h4></div>
                         </div>
                     )}
 
                     {activeTab === 'products' && (
                         <div className="products-management-layout">
                             <div className="management-form glass">
-                                <h3>{editingProduct ? "Edit" : "Add"} Product</h3>
+                                <h3>{editingProduct ? "Update" : "Add"} Item</h3>
                                 <form onSubmit={handleSave}>
-                                    <div className="form-group">
-                                        <label>Title</label>
-                                        <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
-                                    </div>
+                                    <div className="form-group"><label>Title</label><input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required /></div>
                                     <div className="form-group">
                                         <label>Category</label>
                                         <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-                                            {categories.filter(c => c !== "All").map(c => (
-                                                <option key={c} value={c}>{c}</option>
-                                            ))}
+                                            {categories.filter(c => c !== "All").map(c => (<option key={c} value={c}>{c}</option>))}
                                         </select>
                                     </div>
+                                    <div className="form-group"><label>Description</label><textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
                                     <div className="form-group">
-                                        <label>Description</label>
-                                        <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Image (File)</label>
+                                        <label>Image</label>
                                         <input type="file" accept="image/*" onChange={(e) => {
                                             const file = e.target.files[0];
                                             if (file) {
@@ -270,20 +265,20 @@ const AdminPanel = () => {
                                             }
                                         }} />
                                     </div>
-                                    <button type="submit" className="pro-btn pro-btn--primary">{editingProduct ? "Update" : "Create"}</button>
+                                    <button type="submit" className="pro-btn pro-btn--primary" disabled={isLoading}>
+                                        {isLoading ? "Syncing..." : (editingProduct ? "Save Changes" : "Create Product")}
+                                    </button>
                                 </form>
                             </div>
-
                             <div className="management-list glass">
                                 <div className="pro-admin-grid">
                                     {filteredProducts.map(p => (
                                         <div key={p._id} className="pro-admin-card">
                                             <div className="card-thumb">{p.image && <img src={p.image} alt="" />}</div>
                                             <h4>{p.title}</h4>
-                                            <p>{p.category}</p>
                                             <div className="card-ops">
                                                 <button onClick={() => handleEdit(p)}>Edit</button>
-                                                <button className="del" onClick={() => handleDelete(p._id)}>Remove</button>
+                                                <button className="del" onClick={() => handleDelete(p._id)}>Delete</button>
                                             </div>
                                         </div>
                                     ))}
@@ -295,14 +290,14 @@ const AdminPanel = () => {
                     {activeTab === 'categories' && (
                         <div className="categories-management-layout glass">
                             <form className="cat-add-form" onSubmit={handleAddCategory}>
-                                <input type="text" value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Category Name" required />
+                                <input type="text" value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="New Category Name" required />
                                 <button type="submit" className="pro-btn pro-btn--primary">Add</button>
                             </form>
                             <div className="pro-cat-list">
                                 {categories.map(c => (
                                     <div key={c} className="pro-cat-item glass">
                                         <span>{c}</span>
-                                        {c !== "All" && <button className="cat-remove" onClick={() => handleDeleteCategory(c)}>X</button>}
+                                        {!defaultCategories.includes(c) && <button className="cat-remove" onClick={() => handleDeleteCategory(c)}>X</button>}
                                     </div>
                                 ))}
                             </div>
