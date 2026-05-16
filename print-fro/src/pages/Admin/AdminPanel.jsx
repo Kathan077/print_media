@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { productsData as defaultProducts, defaultCategories } from '../../components/Home/Products/Products';
+import { defaultCategories } from '../../components/Home/Products/Products';
 import './AdminPanel.css';
 
 const ADMIN_CREDENTIALS = {
@@ -9,7 +9,9 @@ const ADMIN_CREDENTIALS = {
 };
 
 const AdminPanel = () => {
-    // Check if logged in
+    // API Base URL
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
         return localStorage.getItem("viralprint_admin_auth") === "true";
     });
@@ -22,6 +24,7 @@ const AdminPanel = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [newCategory, setNewCategory] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     // Navigation
     const [activeTab, setActiveTab] = useState("dashboard");
@@ -31,14 +34,25 @@ const AdminPanel = () => {
     const [editingProduct, setEditingProduct] = useState(null);
     const [formData, setFormData] = useState({ id: null, title: "", category: "Sign Boards", description: "", price: "", image: "", whatsappMsg: "" });
 
-    useEffect(() => {
-        const stored = localStorage.getItem("viralprint_products");
-        if (stored) {
-            setProducts(JSON.parse(stored));
-        } else {
-            setProducts(defaultProducts);
-            localStorage.setItem("viralprint_products", JSON.stringify(defaultProducts));
+    // Fetch Products from Database
+    const fetchProducts = async () => {
+        setIsLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/api/products`);
+            const data = await res.json();
+            if (data.success) {
+                setProducts(data.data);
+            }
+        } catch (err) {
+            console.error("Fetch Error:", err);
+            setError("Could not connect to Database. Please check backend.");
+        } finally {
+            setIsLoading(false);
         }
+    };
+
+    useEffect(() => {
+        fetchProducts();
 
         const storedCats = localStorage.getItem("viralprint_categories");
         if (storedCats) {
@@ -65,36 +79,46 @@ const AdminPanel = () => {
         setIsAuthenticated(false);
     };
 
-    // CRUD
-    const handleSave = (e) => {
+    // CRUD: CREATE & UPDATE
+    const handleSave = async (e) => {
         e.preventDefault();
-        
-        if(!formData.title) return; // Basic validation
+        if(!formData.title) return;
 
-        let updatedProducts;
         let generatedWhatsappMsg = formData.whatsappMsg;
-        
         if (!generatedWhatsappMsg) {
             generatedWhatsappMsg = `Hi Viral Print, I'm interested in ${formData.title}. Can you provide more details?`;
         }
 
         const finalFormData = { ...formData, whatsappMsg: generatedWhatsappMsg };
-
-        if (editingProduct) {
-            updatedProducts = products.map(p => p.id === formData.id ? finalFormData : p);
-            setSuccessMsg("Product updated successfully!");
-        } else {
-            const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-            updatedProducts = [...products, { ...finalFormData, id: newId }];
-            setSuccessMsg("New product added successfully!");
-        }
         
-        setProducts(updatedProducts);
-        localStorage.setItem("viralprint_products", JSON.stringify(updatedProducts));
-        setEditingProduct(null);
-        setFormData({ id: null, title: "", category: "Sign Boards", description: "", price: "", image: "", whatsappMsg: "" });
+        setIsLoading(true);
+        try {
+            const method = editingProduct ? 'PUT' : 'POST';
+            const endpoint = editingProduct ? `${API_URL}/api/products/${formData._id}` : `${API_URL}/api/products`;
 
-        setTimeout(() => setSuccessMsg(""), 3000);
+            const res = await fetch(endpoint, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(finalFormData)
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                setSuccessMsg(editingProduct ? "Product updated!" : "Product added!");
+                fetchProducts(); // Refresh list
+                setEditingProduct(null);
+                setFormData({ id: null, title: "", category: "Sign Boards", description: "", price: "", image: "", whatsappMsg: "" });
+            } else {
+                setError(data.message || "Failed to save product.");
+            }
+        } catch (err) {
+            console.error("Save Error:", err);
+            setError("Network error. Could not save.");
+        } finally {
+            setIsLoading(false);
+            setTimeout(() => { setSuccessMsg(""); setError(""); }, 3000);
+        }
     };
 
     const handleEdit = (p) => {
@@ -103,27 +127,32 @@ const AdminPanel = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const handleDelete = (id) => {
-        if(window.confirm("Are you sure you want to delete this product?")) {
-            const updatedProducts = products.filter(p => p.id !== id);
-            setProducts(updatedProducts);
-            localStorage.setItem("viralprint_products", JSON.stringify(updatedProducts));
-            setSuccessMsg("Product deleted!");
-            setTimeout(() => setSuccessMsg(""), 3000);
+    const handleDelete = async (id) => {
+        if(!window.confirm("Are you sure you want to delete this product?")) return;
+        
+        setIsLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/api/products/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success) {
+                setSuccessMsg("Product removed!");
+                fetchProducts();
+            }
+        } catch (err) {
+            console.error("Delete Error:", err);
+            setError("Could not delete product.");
+        } finally {
+            setIsLoading(false);
+            setTimeout(() => { setSuccessMsg(""); setError(""); }, 3000);
         }
     };
 
+    // Categories (Still using LocalStorage for now, can be moved to DB later if needed)
     const handleAddCategory = (e) => {
         e.preventDefault();
         const trimmed = newCategory.trim();
         if(!trimmed) return;
-
-        if(categories.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
-            setSuccessMsg("Category already exists!");
-            setTimeout(() => setSuccessMsg(""), 3000);
-            return;
-        }
-
+        if(categories.some(c => c.toLowerCase() === trimmed.toLowerCase())) return;
         const updatedCats = [...categories, trimmed];
         setCategories(updatedCats);
         localStorage.setItem("viralprint_categories", JSON.stringify(updatedCats));
@@ -133,12 +162,8 @@ const AdminPanel = () => {
     };
 
     const handleDeleteCategory = (cat) => {
-        if(cat === "All") {
-            setSuccessMsg("Cannot delete 'All' category!");
-            setTimeout(() => setSuccessMsg(""), 3000);
-            return;
-        }
-        if(window.confirm(`Are you sure you want to delete category '${cat}'? Products using this may not filter properly.`)) {
+        if(cat === "All") return;
+        if(window.confirm(`Delete category '${cat}'?`)) {
             const updatedCats = categories.filter(c => c !== cat);
             setCategories(updatedCats);
             localStorage.setItem("viralprint_categories", JSON.stringify(updatedCats));
@@ -191,24 +216,15 @@ const AdminPanel = () => {
                 </div>
                 
                 <nav className="sidebar-nav">
-                    <button 
-                        className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('dashboard')}
-                    >
+                    <button className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
                         <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                         <span>Dashboard</span>
                     </button>
-                    <button 
-                        className={`nav-item ${activeTab === 'products' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('products')}
-                    >
+                    <button className={`nav-item ${activeTab === 'products' ? 'active' : ''}`} onClick={() => setActiveTab('products')}>
                         <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8l-2-2H5L3 8v10a2 2 0 002 2h14a2 2 0 002-2V8z"></path><path d="M3 8h18"></path><path d="M10 12h4"></path></svg>
                         <span>Products</span>
                     </button>
-                    <button 
-                        className={`nav-item ${activeTab === 'categories' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('categories')}
-                    >
+                    <button className={`nav-item ${activeTab === 'categories' ? 'active' : ''}`} onClick={() => setActiveTab('categories')}>
                         <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"></path></svg>
                         <span>Categories</span>
                     </button>
@@ -247,6 +263,7 @@ const AdminPanel = () => {
 
                 <div className="admin-scroll-area">
                     {successMsg && <div className="success-banner">{successMsg}</div>}
+                    {error && <div className="success-banner" style={{background: '#ff4d4d'}}>{error}</div>}
 
                     {activeTab === 'dashboard' && (
                         <div className="dashboard-grid">
@@ -261,14 +278,14 @@ const AdminPanel = () => {
                                 <div className="stat-chart" style={{ background: 'var(--magenta)' }} />
                             </div>
                             <div className="stat-card glass">
-                                <span className="stat-label">System Health</span>
-                                <span className="stat-value">Optimal</span>
+                                <span className="stat-label">Database Status</span>
+                                <span className="stat-value">{isLoading ? "SYNC..." : "LIVE"}</span>
                                 <div className="stat-chart" style={{ background: 'var(--yellow)' }} />
                             </div>
 
                             <div className="recent-activity glass">
-                                <h3>System Info</h3>
-                                <p>Welcome to the Viral Print Media Admin Pro. From here you can manage your digital catalog and update pricing in real-time.</p>
+                                <h3>Cloud Database Active</h3>
+                                <p>Products are now stored in MongoDB. Changes made here will be visible on all devices instantly.</p>
                                 <button className="pro-btn pro-btn--primary" onClick={() => setActiveTab('products')}>
                                     Start Managing
                                 </button>
@@ -321,8 +338,8 @@ const AdminPanel = () => {
                                         <input type="text" value={formData.whatsappMsg} onChange={e => setFormData({...formData, whatsappMsg: e.target.value})} placeholder="Default will be generated..." />
                                     </div>
                                     <div className="form-actions">
-                                        <button type="submit" className="pro-btn pro-btn--primary">
-                                            {editingProduct ? "Apply Changes" : "Create Product"}
+                                        <button type="submit" className="pro-btn pro-btn--primary" disabled={isLoading}>
+                                            {isLoading ? "Saving..." : (editingProduct ? "Apply Changes" : "Create Product")}
                                         </button>
                                         {editingProduct && (
                                             <button type="button" className="pro-btn outline-btn" onClick={() => {
@@ -337,30 +354,32 @@ const AdminPanel = () => {
                             </div>
 
                             <div className="management-list glass">
-                                <h3>Catalog ({filteredProducts.length})</h3>
-                                <div className="pro-admin-grid">
-                                    {filteredProducts.map(p => (
-                                        <div key={p.id} className="pro-admin-card">
-                                            <div className="card-thumb">
-                                                {p.image ? <img src={p.image} alt="" /> : <div className="no-img" />}
+                                <h3>Catalog ({products.length})</h3>
+                                {isLoading && products.length === 0 ? <p>Loading Products...</p> : (
+                                    <div className="pro-admin-grid">
+                                        {filteredProducts.map(p => (
+                                            <div key={p._id || p.id} className="pro-admin-card">
+                                                <div className="card-thumb">
+                                                    {p.image ? <img src={p.image} alt="" /> : <div className="no-img" />}
+                                                </div>
+                                                <div className="card-details">
+                                                    <h4>{p.title}</h4>
+                                                    <span>{p.category}</span>
+                                                </div>
+                                                <div className="card-ops">
+                                                    <button onClick={() => handleEdit(p)} title="Edit Product">
+                                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                                        Edit
+                                                    </button>
+                                                    <button className="del" onClick={() => handleDelete(p._id)} title="Delete Product">
+                                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+                                                        Remove
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className="card-details">
-                                                <h4>{p.title}</h4>
-                                                <span>{p.category}</span>
-                                            </div>
-                                            <div className="card-ops">
-                                                <button onClick={() => handleEdit(p)} title="Edit Product">
-                                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                                    Edit
-                                                </button>
-                                                <button className="del" onClick={() => handleDelete(p.id)} title="Delete Product">
-                                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
-                                                    Remove
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
@@ -369,13 +388,7 @@ const AdminPanel = () => {
                         <div className="categories-management-layout glass">
                             <div className="cat-header">
                                 <form className="cat-add-form" onSubmit={handleAddCategory}>
-                                    <input 
-                                        type="text" 
-                                        value={newCategory} 
-                                        onChange={e => setNewCategory(e.target.value)} 
-                                        placeholder="New category name..." 
-                                        required 
-                                    />
+                                    <input type="text" value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="New category name..." required />
                                     <button type="submit" className="pro-btn pro-btn--primary">Add</button>
                                 </form>
                             </div>
