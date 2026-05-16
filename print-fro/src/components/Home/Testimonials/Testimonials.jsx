@@ -48,6 +48,7 @@ const Testimonials = () => {
           scrollTrigger: {
             trigger: ".testimonials-wrap",
             start: "top 80%",
+            fastScrollEnd: true,
           },
           y: 0,
           opacity: 1,
@@ -64,6 +65,8 @@ const Testimonials = () => {
           scrollTrigger: {
             trigger: ".testi-grid",
             start: "top 85%",
+            fastScrollEnd: true,
+            preventOverlaps: true,
           },
           y: 0,
           opacity: 1,

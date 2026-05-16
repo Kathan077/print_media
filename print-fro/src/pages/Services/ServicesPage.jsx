@@ -87,16 +87,15 @@ export default function ServicesPage() {
       });
 
       // Stacked Cards Parallax / Scale Down effect
-      // When a card hits the top and sticks, we scale it down slightly as the user scrolls past it
       const cards = gsap.utils.toArray('.stacked-card');
       cards.forEach((card, i) => {
-        if (i !== cards.length - 1) { // Don't scale down the last card
+        if (i !== cards.length - 1) {
           gsap.to(card, {
             scale: 0.92,
             opacity: 0.5,
             scrollTrigger: {
               trigger: card,
-              start: "top 40px", // adjust based on top sticky value
+              start: "top 40px",
               end: "bottom 40px",
               scrub: true,
             }
@@ -141,7 +140,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* --- VERTICAL STACKED CATEGORIES (THE PROPER WAY) --- */}
+      {/* --- VERTICAL STACKED CATEGORIES --- */}
       <section className="svc-stack-wrapper">
         <div className="container">
           <div className="stack-header reveal-up">
@@ -154,7 +153,7 @@ export default function ServicesPage() {
               <div 
                 className="stacked-card" 
                 key={data.id} 
-                style={{ top: `calc(${index * 30}px + 100px)` }} // Staggering the sticky top
+                style={{ top: `calc(${index * 30}px + 100px)` }}
               >
                 <div className="stacked-card-inner">
                   <div className="stack-left">
@@ -180,7 +179,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* --- EXTRA SECTION: PREMIUM FINISHES --- */}
+      {/* --- PREMIUM FINISHES --- */}
       <section className="svc-finishes section">
         <div className="container">
           <h2 className="svc-section-title reveal-up">PREMIUM FINISHES</h2>
@@ -200,7 +199,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* --- OUR ARSENAL (PRINTERS) --- */}
+      {/* --- OUR ARSENAL --- */}
       <section className="svc-arsenal section">
         <div className="container">
           <h2 className="svc-section-title reveal-up">THE ARSENAL</h2>
@@ -240,7 +239,6 @@ export default function ServicesPage() {
            <p className="reveal-up">Upload your designs or consult with our experts online today.</p>
            <div className="svc-cta-links reveal-up">
              <a href="https://wa.me/919875270319" className="pro-btn pro-btn--primary">Start WhatsApp Order</a>
-             <a href="/catalog" className="pro-btn pro-btn--outline">Explore Catalog</a>
            </div>
         </div>
       </section>

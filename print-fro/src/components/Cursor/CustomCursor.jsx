@@ -6,9 +6,18 @@ const CustomCursor = () => {
     const positionRef = useRef({ x: 0, y: 0 });
     const followerRef = useRef({ x: 0, y: 0 });
     const [isHovering, setIsHovering] = useState(false);
+    const [isVisible, setIsVisible] = useState(false); // Start hidden until first move
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
+        const checkMobile = () => {
+            const touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            setIsMobile(touch || window.innerWidth < 768);
+        };
+        checkMobile();
+
         const mouseMove = (e) => {
+            if (!isVisible && !isMobile) setIsVisible(true);
             positionRef.current = { x: e.clientX, y: e.clientY };
             if (mainCursor.current) {
                 mainCursor.current.style.left = `${e.clientX}px`;
@@ -52,6 +61,8 @@ const CustomCursor = () => {
             cancelAnimationFrame(animation);
         };
     }, []);
+
+    if (isMobile || !isVisible) return null;
 
     return (
         <>

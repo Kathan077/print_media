@@ -416,8 +416,8 @@
     }
 
     .process-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
+        grid-template-columns: 1fr; /* One per row for better readability */
+        gap: 20px;
     }
 
     .mastery-grid {
@@ -457,11 +457,18 @@
     }
 
     .about-hero__title {
-        font-size: clamp(2.5rem, 8vw, 5rem);
+        font-size: clamp(2.5rem, 11vw, 6rem);
+        line-height: 0.9;
+    }
+
+    .about-hero__subtitle {
+        margin-top: 2rem;
+        font-size: 1rem;
     }
 
     .essence-statement {
-        font-size: clamp(1.6rem, 6vw, 3rem);
+        font-size: clamp(1.6rem, 7vw, 2.5rem);
+        line-height: 1.2;
     }
 
     .section-subtitle {
@@ -519,8 +526,8 @@
     }
 
     .about-hero__subtitle {
-        font-size: 0.95rem;
-        margin-top: 2rem;
+        font-size: 0.9rem;
+        margin-top: 1.5rem;
     }
 
     .essence-statement {
@@ -551,7 +558,7 @@
     }
 
     .about-hero__title {
-        font-size: 2.5rem;
+        font-size: clamp(2.2rem, 10vw, 3rem);
     }
 
     .process-item {

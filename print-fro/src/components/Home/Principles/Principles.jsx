@@ -68,6 +68,7 @@ const Principles = () => {
                         trigger: ".pr-box-grid",
                         start: "top 80%",
                         toggleActions: "play none none reverse",
+                        fastScrollEnd: true,
                     },
                     y: 0,
                     opacity: 1,
@@ -84,6 +85,7 @@ const Principles = () => {
                     scrollTrigger: {
                         trigger: ".pr-box-header",
                         start: "top 90%",
+                        fastScrollEnd: true,
                     },
                     opacity: 1,
                     x: 0,

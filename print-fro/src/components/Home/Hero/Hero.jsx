@@ -15,8 +15,8 @@ const SCENES = [
   {
     video: vid1,
     chapter: '01 — THE IDEA',
-    lines: ['Your Brand,', 'Beautifully', 'Printed.'],
-    accent: 2,
+    lines: ['Your Brand,', 'Beautifully Printed.'],
+    accent: 1,
     body: 'We transform raw concepts into print masterpieces that stop people mid-scroll.',
     cta: 'Start a Project',
     color: '#6366f1',
@@ -24,8 +24,8 @@ const SCENES = [
   {
     video: vid2,
     chapter: '02 — THE CRAFT',
-    lines: ['Precision', 'In Every', 'Drop of Ink.'],
-    accent: 0,
+    lines: ['Precision In Every', 'Drop of Ink.'],
+    accent: 1,
     body: 'State-of-the-art presses. Paper that speaks. Details no one else catches — but everyone feels.',
     cta: 'See Our Process',
     color: '#a855f7',
@@ -33,7 +33,7 @@ const SCENES = [
   {
     video: vid3,
     chapter: '03 — THE IDENTITY',
-    lines: ['A Brand', 'Without', 'Limits.'],
+    lines: ['A Brand', 'Without Limits.'],
     accent: 1,
     body: 'Bold colours. Premium finishes. Designs that walk into a room before you do.',
     cta: 'Explore Finishes',
@@ -42,8 +42,8 @@ const SCENES = [
   {
     video: vid4,
     chapter: '04 — THE LEGACY',
-    lines: ['Print Like', 'You Mean', 'Business.'],
-    accent: 2,
+    lines: ['Print Like You', 'Mean Business.'],
+    accent: 1,
     body: 'Join thousands of brands that chose quality over ordinary. Your story starts here.',
     cta: 'Get Started Now',
     color: '#f59e0b',
@@ -62,137 +62,82 @@ export default function Hero() {
   const numRef      = useRef(null);
   const orbRef      = useRef(null);
 
+  const [currentIdx, setCurrentIdx] = React.useState(0);
+  const timerRef = useRef(null);
+
   useEffect(() => {
-    /* make sure all refs are mounted */
     if (!wrapRef.current) return;
 
-    const VH = window.innerHeight;
-    const N  = SCENES.length;
+    const N = SCENES.length;
 
-    /* ── start all videos (muted autoplay) ── */
-    videoRefs.current.forEach((v, i) => {
-      if (!v) return;
-      v.muted   = true;
-      v.loop    = true;
-      v.playsInline = true;
-      /* every video plays all the time — we change opacity instead */
-      v.play().catch(() => {});
-    });
-
-    /* ── initial CSS states (no autoAlpha — just opacity + transform) ── */
+    // Set initial states
     SCENES.forEach((_, i) => {
-      /* panels: all visible but opacity 0 except first */
       gsap.set(panelRefs.current[i], { opacity: i === 0 ? 1 : 0 });
-
-      /* content items hidden */
       const c = contentRefs.current[i];
       if (!c) return;
-      gsap.set(c.querySelectorAll('.hl'), { opacity: 0, y: 60, skewY: 5 });
-      gsap.set(c.querySelector('.s-chapter'), { opacity: 0, y: -14 });
-      gsap.set(c.querySelector('.s-body'),    { opacity: 0, y: 22 });
-      gsap.set(c.querySelector('.s-cta'),     { opacity: 0, y: 16, scale: 0.95 });
+      gsap.set(c.querySelectorAll('.hl'), { opacity: 0, y: 30, skewY: 5 });
+      gsap.set(c.querySelector('.s-chapter'), { opacity: 0, y: -10 });
+      gsap.set(c.querySelector('.s-body'), { opacity: 0, y: 15 });
+      gsap.set(c.querySelector('.s-cta'), { opacity: 0, y: 10, scale: 0.95 });
     });
 
-    /* animate scene 0 content in immediately on load */
-    const introC = contentRefs.current[0];
-    if (introC) {
-      gsap.timeline({ delay: 0.3 })
-        .to(introC.querySelector('.s-chapter'), { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' })
-        .to(introC.querySelectorAll('.hl'), {
-          opacity: 1, y: 0, skewY: 0, duration: 1, stagger: 0.12, ease: 'expo.out',
-        }, 0.1)
-        .to(introC.querySelector('.s-body'), { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 0.55)
-        .to(introC.querySelector('.s-cta'),  { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'back.out(1.5)' }, 0.75);
-    }
+    const playScene = (idx) => {
+      const scene = SCENES[idx];
+      const panel = panelRefs.current[idx];
+      const content = contentRefs.current[idx];
 
-    /* ── PIN stage ── */
-    ScrollTrigger.create({
-      trigger: wrapRef.current,
-      start: 'top top',
-      end: `+=${(N - 1) * VH}`,
-      pin: stageRef.current,
-      pinSpacing: false,
-      anticipatePin: 1,
-    });
-
-    /* ── Transitions between scenes ── */
-    for (let i = 0; i < N - 1; i++) {
-      const nextI = i + 1;
-      const scene = SCENES[nextI];
-
-      /* trigger point: scene i starts exiting, scene i+1 starts entering */
-      ScrollTrigger.create({
-        trigger: wrapRef.current,
-        start: `+=${i * VH + VH * 0.6} top`,
-        end:   `+=${nextI * VH} top`,
-        scrub: 1.5,
-        onEnter: () => {
-          /* update HUD */
-          if (numRef.current) numRef.current.textContent = `0${nextI + 1}`;
-          if (progRef.current)
-            gsap.to(progRef.current, { scaleX: (nextI + 1) / N, duration: 0.5, ease: 'power2.out' });
-          /* orb colour */
-          if (orbRef.current)
-            gsap.to(orbRef.current, {
-              background: `radial-gradient(circle, ${scene.color}44 0%, transparent 70%)`,
-              duration: 0.7,
-            });
-          /* dots */
-          dotRefs.current.forEach((d, di) =>
-            gsap.to(d, {
-              backgroundColor: di <= nextI ? '#fff' : 'rgba(255,255,255,0.2)',
-              scale: di === nextI ? 1.6 : 1,
-              duration: 0.3,
-            })
-          );
-          /* animate next content in */
-          const c = contentRefs.current[nextI];
-          if (c) {
-            gsap.timeline()
-              .to(c.querySelector('.s-chapter'), { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
-              .to(c.querySelectorAll('.hl'), {
-                opacity: 1, y: 0, skewY: 0, duration: 0.9, stagger: 0.11, ease: 'expo.out',
-              }, 0.08)
-              .to(c.querySelector('.s-body'), { opacity: 1, y: 0, duration: 0.65, ease: 'power2.out' }, 0.4)
-              .to(c.querySelector('.s-cta'),  { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'back.out(1.5)' }, 0.55);
-          }
-        },
-        onEnterBack: () => {
-          /* revert back to previous scene */
-          if (numRef.current) numRef.current.textContent = `0${i + 1}`;
-          if (progRef.current)
-            gsap.to(progRef.current, { scaleX: (i + 1) / N, duration: 0.4 });
-          if (orbRef.current)
-            gsap.to(orbRef.current, {
-              background: `radial-gradient(circle, ${SCENES[i].color}44 0%, transparent 70%)`,
-              duration: 0.7,
-            });
-          dotRefs.current.forEach((d, di) =>
-            gsap.to(d, {
-              backgroundColor: di <= i ? '#fff' : 'rgba(255,255,255,0.2)',
-              scale: di === i ? 1.6 : 1,
-              duration: 0.3,
-            })
-          );
-          /* reset next scene content */
-          const c = contentRefs.current[nextI];
-          if (c) {
-            gsap.to(c.querySelectorAll('.hl'), { opacity: 0, y: 60, skewY: 5, duration: 0.3 });
-            gsap.to([c.querySelector('.s-chapter'), c.querySelector('.s-body'), c.querySelector('.s-cta')], {
-              opacity: 0, duration: 0.3,
-            });
-          }
-        },
-        /* panel crossfade driven by scrub */
-        onUpdate: (self) => {
-          gsap.set(panelRefs.current[i],     { opacity: 1 - self.progress });
-          gsap.set(panelRefs.current[nextI], { opacity: self.progress });
-        },
+      // Video play
+      videoRefs.current.forEach((v, i) => {
+        if (!v) return;
+        if (i === idx) v.play().catch(() => {});
+        else v.pause();
       });
-    }
+
+      const tl = gsap.timeline();
+      
+      // Crossfade
+      panelRefs.current.forEach((p, i) => {
+        if (i === idx) gsap.to(p, { opacity: 1, duration: 1.5 });
+        else gsap.to(p, { opacity: 0, duration: 1.5 });
+      });
+
+      // Text In
+      tl.to(content.querySelector('.s-chapter'), { opacity: 1, y: 0, duration: 0.6 })
+        .to(content.querySelectorAll('.hl'), { opacity: 1, y: 0, skewY: 0, duration: 0.8, stagger: 0.1 }, 0.1)
+        .to(content.querySelector('.s-body'), { opacity: 1, y: 0, duration: 0.7 }, 0.4)
+        .to(content.querySelector('.s-cta'), { opacity: 1, y: 0, scale: 1, duration: 0.5 }, 0.55)
+        .to(orbRef.current, { 
+          background: `radial-gradient(circle, ${scene.color}44 0%, transparent 70%)`,
+          duration: 1.2 
+        }, 0);
+
+      // HUD
+      if (numRef.current) numRef.current.textContent = `0${idx + 1}`;
+      if (progRef.current) gsap.to(progRef.current, { scaleX: (idx + 1) / N, duration: 0.5 });
+      
+      dotRefs.current.forEach((d, i) => {
+        if (d) gsap.to(d, { 
+          backgroundColor: i === idx ? '#fff' : 'rgba(255,255,255,0.2)',
+          scale: i === idx ? 1.6 : 1,
+          duration: 0.4
+        });
+      });
+    };
+
+    // Initial play
+    playScene(0);
+
+    // Auto Slide Timer
+    timerRef.current = setInterval(() => {
+      setCurrentIdx(prev => {
+        const next = (prev + 1) % N;
+        playScene(next);
+        return next;
+      });
+    }, 6000); // 6 seconds per slide
 
     return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill());
+      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
 

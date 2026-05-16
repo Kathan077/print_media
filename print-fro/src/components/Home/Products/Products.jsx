@@ -75,7 +75,7 @@ const Products = () => {
         }
     }, []);
 
-    const containerRef = useRef(null);
+    const sectionRef = useRef(null);
 
     useEffect(() => {
         let ctx = gsap.context(() => {
@@ -85,6 +85,7 @@ const Products = () => {
                     scrollTrigger: {
                         trigger: ".products-section",
                         start: "top 80%",
+                        fastScrollEnd: true,
                     },
                     y: 0,
                     opacity: 1,
@@ -99,6 +100,8 @@ const Products = () => {
                     scrollTrigger: {
                         trigger: ".products-grid",
                         start: "top 80%",
+                        fastScrollEnd: true,
+                        preventOverlaps: true,
                     },
                     y: 0,
                     opacity: 1,
@@ -108,7 +111,7 @@ const Products = () => {
                     ease: "back.out(1.2)"
                 }
             );
-        }, containerRef);
+        }, sectionRef);
         return () => ctx.revert();
     }, []);
 
@@ -145,7 +148,7 @@ const Products = () => {
     };
 
     return (
-        <section className="products-section" id="products">
+        <section className="products-section" id="products" ref={sectionRef}>
             <div className="section-header">
                 <span className="section-tag">OUR CATALOG</span>
                 <h2 className="section-title">PREMIUM PRINTING <span>SOLUTIONS</span></h2>
@@ -163,7 +166,7 @@ const Products = () => {
                 </div>
             </div>
 
-            <div className="products-grid" ref={containerRef}>
+            <div className="products-grid">
                 {filteredProducts.map(product => (
                     <div className="product-card" key={product.id}>
                         <div className="product-img-wrap">

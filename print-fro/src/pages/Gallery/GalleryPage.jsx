@@ -77,34 +77,6 @@ const GalleryPage = () => {
 
     // Universal animations (All screens)
     mm.add("all", () => {
-      // 1. Spotlight Hero Animation
-      gsap.to(".gal-spotlight-img", {
-        scrollTrigger: {
-          trigger: ".gal-spotlight",
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true
-        },
-        scale: 1.3,
-        y: 100,
-      });
-
-      // Reveal text
-      gsap.fromTo(".spotlight-text span",
-        { y: 150, opacity: 0 },
-        {
-          scrollTrigger: {
-            trigger: ".gal-spotlight",
-            start: "top 80%",
-          },
-          y: 0,
-          opacity: 1,
-          duration: 1.2,
-          stagger: 0.1,
-          ease: "expo.out"
-        }
-      );
-
       // 2. Masonry items reveal
       gsap.fromTo(".gal-item",
         { y: 100, opacity: 0, scale: 0.9 },
@@ -125,30 +97,10 @@ const GalleryPage = () => {
 
     return () => mm.revert();
   }, []);
-
   return (
     <div className="gallery-page" ref={containerRef}>
       <Header />
       
-      {/* SECTION 1: THE SPOTLIGHT */}
-      <section className="gal-spotlight" ref={spotlightRef}>
-        <div className="spotlight-bg">
-            <div className="spotlight-overlay"></div>
-            <img 
-                src="https://images.unsplash.com/photo-1541746972662-841f486d3b37?auto=format&fit=crop&q=80&w=2000" 
-                alt="Studio" 
-                className="gal-spotlight-img"
-            />
-        </div>
-        <div className="spotlight-content container">
-            <span className="spotlight-eyebrow">OUR PORTFOLIO</span>
-            <h1 className="spotlight-text">
-                <span className="outline">THE</span>
-                <span>VAULT</span>
-            </h1>
-        </div>
-      </section>
-
       {/* SECTION 2: THE MASONRY GRID */}
       <section className="gallery-section">
         <div className="container">

@@ -271,7 +271,7 @@ const QuotePage = () => {
                                 </div>
                                 <h3 className="qp-modal-title">Sent Successfully!</h3>
                                 <p className="qp-modal-message">
-                                    Bhai, aapka contact form data receive ho gaya hai! Ek stunning HTML format notification aapke <strong>Email</strong> pe chala gaya hai aur confirmation <strong>SMS</strong> user ke phone pe bhej diya gaya hai.
+                                    Your request has been received successfully. A detailed proposal has been sent to your <strong>Email</strong>, and a confirmation <strong>SMS</strong> has been delivered to your phone.
                                 </p>
                                 <button className="pro-btn pro-btn--primary modal-btn" onClick={handleCloseModal}>
                                     Got it, thanks!
