@@ -28,7 +28,7 @@ const AboutPage = () => {
         ease: 'power3.out'
       });
 
-      // Section Reveals (Fixed GSAP Bug)
+      // Section Reveals
       gsap.utils.toArray('.reveal-up').forEach((el) => {
         gsap.fromTo(el, 
           { y: 60, opacity: 0 },
@@ -45,13 +45,13 @@ const AboutPage = () => {
         );
       });
 
-      // Process Items Stagger (Fixed GSAP Bug)
+      // Process Items Stagger
       gsap.fromTo('.process-item', 
         { y: 40, opacity: 0 },
         {
           scrollTrigger: {
             trigger: '.process-grid',
-            start: 'top 80%', // Triggers slightly earlier
+            start: 'top 80%',
           },
           y: 0,
           opacity: 1,
@@ -108,7 +108,7 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* --- MASTER IMAGE (OPTIONAL/DECORATIVE) --- */}
+        {/* --- MASTER IMAGE --- */}
         <section className="about-image-strip">
           <div className="strip-container">
             <div className="gradient-divider"></div>
@@ -116,7 +116,6 @@ const AboutPage = () => {
         </section>
 
         <section className="section about-process">
-          {/* Decorative background elements */}
           <div className="decor-circle decor-1"></div>
           <div className="decor-circle decor-2"></div>
           
@@ -147,7 +146,6 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* --- MASTERY/TECH (WHITE SECTION) --- */}
         <section className="section white-section about-mastery">
           <div className="container">
             <div className="mastery-content">
@@ -179,7 +177,6 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* --- TECH SPECS --- */}
         <section className="section about-specs">
           <div className="container">
             <div className="specs-grid">
@@ -203,7 +200,7 @@ const AboutPage = () => {
         <section className="section about-final-cta">
           <div className="container">
             <span className="about-hero__eyebrow reveal-up">START THE DIALOGUE</span>
-            <Link to="/" className="huge-link reveal-up">
+            <Link to="/quote" className="huge-link reveal-up">
               WORK WITH US <span className="arrow">→</span>
             </Link>
           </div>
