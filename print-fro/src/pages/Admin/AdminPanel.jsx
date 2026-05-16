@@ -48,7 +48,7 @@ const AdminPanel = () => {
     // Fetch Categories
     const fetchCategories = async () => {
         try {
-            const res = await fetch(`${API_URL}/api/categories`);
+            const res = await fetch(`${API_URL}/api/admin/categories`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             if (data.success && data.data && data.data.length > 0) {
@@ -141,7 +141,7 @@ const AdminPanel = () => {
         }
 
         try {
-            const res = await fetch(`${API_URL}/api/categories`, {
+            const res = await fetch(`${API_URL}/api/admin/categories`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: trimmed })
@@ -172,7 +172,7 @@ const AdminPanel = () => {
         if(!window.confirm(`Delete '${catName}'?`)) return;
 
         try {
-            const res = await fetch(`${API_URL}/api/categories/${catName}`, { method: 'DELETE' });
+            const res = await fetch(`${API_URL}/api/admin/categories/${catName}`, { method: 'DELETE' });
             const data = await res.json();
             if (data.success) {
                 setSuccessMsg("Category deleted!");

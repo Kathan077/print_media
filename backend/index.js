@@ -58,28 +58,31 @@ app.get('/', (req, res) => {
 
 // --- CATEGORY ROUTES ---
 
-app.get('/api/categories', async (req, res) => {
+app.get('/api/admin/categories', async (req, res) => {
     try {
         const categories = await Category.find().sort({ createdAt: 1 });
+        res.setHeader('Content-Type', 'application/json');
         res.json({ success: true, data: categories });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
 });
 
-app.post('/api/categories', async (req, res) => {
+app.post('/api/admin/categories', async (req, res) => {
     try {
         const newCat = new Category(req.body);
         const savedCat = await newCat.save();
+        res.setHeader('Content-Type', 'application/json');
         res.status(201).json({ success: true, data: savedCat });
     } catch (err) {
         res.status(400).json({ success: false, message: err.message });
     }
 });
 
-app.delete('/api/categories/:name', async (req, res) => {
+app.delete('/api/admin/categories/:name', async (req, res) => {
     try {
         await Category.findOneAndDelete({ name: req.params.name });
+        res.setHeader('Content-Type', 'application/json');
         res.json({ success: true, message: 'Category deleted' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
