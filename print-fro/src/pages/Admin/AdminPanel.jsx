@@ -9,7 +9,8 @@ const ADMIN_CREDENTIALS = {
 };
 
 const AdminPanel = () => {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    // API Base URL - Ensuring no trailing slash issues
+    const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, "");
 
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
         return localStorage.getItem("viralprint_admin_auth") === "true";
@@ -48,14 +49,12 @@ const AdminPanel = () => {
     const fetchCategories = async () => {
         try {
             const res = await fetch(`${API_URL}/api/categories`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
-            if (data.success && data.data.length > 0) {
+            if (data.success && data.data && data.data.length > 0) {
                 const dbCats = data.data.map(c => c.name);
-                // Ensure default categories are always there
                 const uniqueCats = [...new Set([...defaultCategories, ...dbCats])];
                 setCategories(uniqueCats);
-            } else {
-                setCategories(defaultCategories);
             }
         } catch (err) { 
             console.error("Category Fetch Error:", err);
@@ -103,11 +102,11 @@ const AdminPanel = () => {
                 setSuccessMsg(editingProduct ? "Product Updated!" : "Product Added!");
                 fetchProducts();
                 setEditingProduct(null);
-                setFormData({ id: null, title: "", category: categories[0] || "Sign Boards", description: "", price: "", image: "", whatsappMsg: "" });
+                setFormData({ id: null, title: "", category: "Sign Boards", description: "", price: "", image: "", whatsappMsg: "" });
             } else {
                 setError(data.message || "Failed to save product");
             }
-        } catch (err) { setError("Network error"); }
+        } catch (err) { setError("Network error: " + err.message); }
         finally { setIsLoading(false); setTimeout(() => { setSuccessMsg(""); setError(""); }, 3000); }
     };
 
@@ -130,13 +129,12 @@ const AdminPanel = () => {
         finally { setTimeout(() => setSuccessMsg(""), 3000); }
     };
 
-    // Database Categories
     const handleAddCategory = async (e) => {
         e.preventDefault();
         const trimmed = newCategory.trim();
         if(!trimmed) return;
         
-        if (categories.includes(trimmed)) {
+        if (categories.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
             setError("Category already exists");
             setTimeout(() => setError(""), 3000);
             return;
@@ -148,16 +146,21 @@ const AdminPanel = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: trimmed })
             });
+            
             const data = await res.json();
+            
             if (data.success) {
-                setSuccessMsg(`Category '${trimmed}' added!`);
+                setSuccessMsg(`Category added!`);
                 await fetchCategories();
                 setNewCategory("");
             } else {
                 setError(data.message || "Could not add category");
             }
-        } catch (err) { setError("Category API Error"); }
-        finally { setTimeout(() => { setSuccessMsg(""); setError(""); }, 3000); }
+        } catch (err) { 
+            console.error("Category Add Error:", err);
+            setError("Fetch Error: " + err.message); 
+        }
+        finally { setTimeout(() => { setSuccessMsg(""); setError(""); }, 4000); }
     };
 
     const handleDeleteCategory = async (catName) => {
@@ -184,6 +187,7 @@ const AdminPanel = () => {
             <div className="admin-login-container">
                 <form className="admin-login-form" onSubmit={handleLogin}>
                     <div className="login-header">
+                        <span className="label-caps">SECURE ACCESS</span>
                         <h2>Admin <span>Login</span></h2>
                     </div>
                     {error && <p className="error-msg">{error}</p>}
@@ -196,15 +200,15 @@ const AdminPanel = () => {
                         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
                     <button type="submit" className="pro-btn pro-btn--primary">Enter Dashboard</button>
-                    <Link to="/" className="back-link">Back Home</Link>
+                    <Link to="/" className="back-link">Return to Home</Link>
                 </form>
             </div>
         );
     }
 
     const filteredProducts = products.filter(p => 
-        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchTerm.toLowerCase())
+        (p.title && p.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (p.category && p.category.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     return (
@@ -227,12 +231,14 @@ const AdminPanel = () => {
 
             <main className="admin-main">
                 <header className="admin-top-bar">
-                    <h2>{activeTab.toUpperCase()}</h2>
+                    <div className="top-bar-left">
+                        <h2>{activeTab.toUpperCase()}</h2>
+                    </div>
                 </header>
 
                 <div className="admin-scroll-area">
                     {successMsg && <div className="success-banner">{successMsg}</div>}
-                    {error && <div className="success-banner" style={{background: '#ff4d4d'}}>{error}</div>}
+                    {error && <div className="success-banner" style={{background: '#ff4d4d', color: '#fff'}}>{error}</div>}
 
                     {activeTab === 'dashboard' && (
                         <div className="dashboard-grid">
@@ -265,9 +271,7 @@ const AdminPanel = () => {
                                             }
                                         }} />
                                     </div>
-                                    <button type="submit" className="pro-btn pro-btn--primary" disabled={isLoading}>
-                                        {isLoading ? "Syncing..." : (editingProduct ? "Save Changes" : "Create Product")}
-                                    </button>
+                                    <button type="submit" className="pro-btn pro-btn--primary" disabled={isLoading}>{isLoading ? "Saving..." : (editingProduct ? "Save" : "Create")}</button>
                                 </form>
                             </div>
                             <div className="management-list glass">
@@ -290,7 +294,7 @@ const AdminPanel = () => {
                     {activeTab === 'categories' && (
                         <div className="categories-management-layout glass">
                             <form className="cat-add-form" onSubmit={handleAddCategory}>
-                                <input type="text" value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="New Category Name" required />
+                                <input type="text" value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Category Name" required />
                                 <button type="submit" className="pro-btn pro-btn--primary">Add</button>
                             </form>
                             <div className="pro-cat-list">
